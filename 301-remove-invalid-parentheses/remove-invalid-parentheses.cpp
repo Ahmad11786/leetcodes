@@ -1,59 +1,70 @@
 class Solution {
 public:
-    vector<string> removeInvalidParentheses(string s) {
-        vector<string> ans;
-        unordered_set<string> visited;
-        queue<string> q;
 
-        q.push(s);
-        visited.insert(s);
+    bool valid(string s) {
+        int count = 0;
 
-        bool found = false;
+        for (char c : s) {
+            if (c == '(')
+                count++;
 
-        while (!q.empty()) {
-            string curr = q.front();
-            q.pop();
+            else if (c == ')') {
+                count--;
 
-            int balance = 0;
-            bool valid = true;
-
-            for (char c : curr) {
-                if (c == '(') {
-                    balance++;
-                }
-                else if (c == ')') {
-                    balance--;
-
-                    if (balance < 0) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-
-            if (balance == 0 && valid) {
-                ans.push_back(curr);
-                found = true;
-            }
-
-            if (found) {
-                continue;
-            }
-
-            for (int i = 0; i < curr.size(); i++) {
-                if (curr[i] != '(' && curr[i] != ')') {
-                    continue;
-                }
-
-                string next = curr.substr(0, i) + curr.substr(i + 1);
-
-                if (visited.find(next) == visited.end()) {
-                    visited.insert(next);
-                    q.push(next);
-                }
+                if (count < 0)
+                    return false;
             }
         }
 
-        return ans;
+        return count == 0;
+    }
+
+    void solve(string s, int index, int remove, unordered_set<string>& ans) {
+
+        if (remove == 0) {
+            if (valid(s))
+                ans.insert(s);
+
+            return;
+        }
+
+        for (int i = index; i < s.size(); i++) {
+
+            if (s[i] != '(' && s[i] != ')')
+                continue;
+
+            string next = s.substr(0, i) + s.substr(i + 1);
+
+            solve(next, i, remove - 1, ans);
+        }
+    }
+
+    vector<string> removeInvalidParentheses(string s) {
+
+        int balance = 0;
+        int remove = 0;
+
+        for (char c : s) {
+
+            if (c == '(') {
+                balance++;
+            }
+
+            else if (c == ')') {
+
+                if (balance > 0)
+                    balance--;
+                else
+                    remove++;
+            }
+        }
+
+        remove += balance;
+
+        unordered_set<string> ans;
+
+        solve(s, 0, remove, ans);
+
+        return vector<string>(ans.begin(), ans.end());
     }
 };
